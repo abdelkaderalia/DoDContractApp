@@ -99,6 +99,8 @@ if __name__ == "__main__":
     df_agencies = get_data('compare_agencies')
     df_agencies = df_agencies.rename(columns={'agency':'Agency'})
 
+    df_all = get_data('compare_all_spending')
+
     agencies = df_agencies['Agency'].unique().tolist() # Convert agency names to list for dropdown menus
     agencies.remove('Department of Defense')
     agencies = sorted(agencies)
@@ -107,25 +109,46 @@ if __name__ == "__main__":
     agency_name = 'Department of Defense'
     tab2.subheader(f'How does the {agency_name} compare to other agencies?') # Add a subheader
     tab2.markdown('<h6 align="left">View data on service contract funds that have been obligated (spent) to date</h6>', unsafe_allow_html=True) # Add a subheader
-    agency_name2 = tab2.selectbox("Compare with another of the federal agencies that leads in service contracting:", agencies) # Store user selection for agency name 2
+    agency_name2 = tab2.selectbox("Compare with another one of the federal agencies that leads in service contracting:", agencies) # Store user selection for agency name 2
+
+    agency_describe = """DoD far outranks all other federal agencies in its service contract spending, which has been extremely proportional to its total spending over time.
+                    Not all other agencies see their contract spending trends mirrored in their total spending to the same degree."""
 
     if agency_name2 == ' ': # If agency name 2 has been selected
 
         h = df_agencies[df_agencies['Agency']==agency_name]
          # Create double line chart
-        fig = px.line(h, x='fiscal_year', y='spending', color='Agency',title=f'Compare Contract Spending - {agency_name}',  color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
+        fig1 = px.line(h, x='fiscal_year', y='spending', color='Agency',title=f'Compare Service Contract Spending - {agency_name}',  color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
 
-        fig.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
-        fig.update_yaxes(title_text="Contract Funds Obligated ($)",range=[0,180000000000]) # Name y axis
-        fig.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
-        fig.update_traces(line=dict(width=3)) # Increase line thickness
-        fig.update_traces(mode="markers+lines", hovertemplate=None)
+        fig1.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
+        fig1.update_yaxes(title_text="Contract Funds Obligated ($)",range=[0,180000000000]) # Name y axis
+        fig1.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
+        fig1.update_traces(line=dict(width=3)) # Increase line thickness
+        fig1.update_traces(mode="markers+lines", hovertemplate=None)
         h['hoverdata'] = h['spending'].apply(human_format)
-        fig.update_layout(hovermode="x")
+        fig1.update_layout(hovermode="x")
         #fig.update_traces(customdata = h['hoverdata'],hovertemplate = "%{customdata}")
-        fig.update_traces(hovertemplate = "%{y}")
+        fig1.update_traces(hovertemplate = "%{y}")
 
-        tab2.plotly_chart(fig, use_container_width=True) # Show plot
+        tab2.plotly_chart(fig1, use_container_width=True) # Show plot
+        tab2.caption('Source: USAspending')
+
+        i = df_all[df_all['Agency']==agency_name]
+
+        fig2 = px.line(i, x='Fiscal Year', y='Obligations', color='Agency',title=f'Compare Total Spending - {agency_name}',  color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
+
+        fig2.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
+        max_i = (i['Obligations'].max()*1.1)
+        fig2.update_yaxes(title_text="Total Obligations ($)",range=[0,max_i]) # Name y axis
+        fig2.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
+        fig2.update_traces(line=dict(width=3)) # Increase line thickness
+        fig2.update_traces(mode="markers+lines", hovertemplate=None)
+        h['hoverdata'] = h['spending'].apply(human_format)
+        fig2.update_layout(hovermode="x")
+        #fig.update_traces(customdata = h['hoverdata'],hovertemplate = "%{customdata}")
+        fig2.update_traces(hovertemplate = "%{y}")
+
+        tab2.plotly_chart(fig2, use_container_width=True) # Show plot
         tab2.caption('Source: USAspending')
 
     else:
@@ -134,20 +157,41 @@ if __name__ == "__main__":
         h = df_agencies[df_agencies['Agency'].isin(a_list)]
 
          # Create double line chart
-        fig = px.line(h, x='fiscal_year', y='spending', color='Agency',title=f'Compare Contract Spending - {agency_name} and {agency_name2}',  color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
+        fig1 = px.line(h, x='fiscal_year', y='spending', color='Agency',title=f'Compare Service Contract Spending - {agency_name} and {agency_name2}', color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
 
-        fig.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
-        fig.update_yaxes(title_text="Contract Funds Obligated ($)",range=[0,180000000000]) # Name y axis
-        fig.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
-        fig.update_traces(line=dict(width=3)) # Increase line thickness
-        fig.update_traces(mode="markers+lines", hovertemplate=None)
+        fig1.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
+        fig1.update_yaxes(title_text="Contract Funds Obligated ($)",range=[0,180000000000]) # Name y axis
+        fig1.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
+        fig1.update_traces(line=dict(width=3)) # Increase line thickness
+        fig1.update_traces(mode="markers+lines", hovertemplate=None)
         h['hoverdata'] = h['spending'].apply(human_format)
-        fig.update_layout(hovermode="x")
+        fig1.update_layout(hovermode="x")
         #fig.update_traces(customdata = h['hoverdata'],hovertemplate = "%{customdata}")
-        fig.update_traces(hovertemplate = "%{y}")
+        fig1.update_traces(hovertemplate = "%{y}")
 
-        tab2.plotly_chart(fig, use_container_width=True) # Show plot
+        tab2.plotly_chart(fig1, use_container_width=True) # Show plot
         tab2.caption('Source: USAspending')
+
+        tab2.write(agency_describe)
+
+        i = df_all[df_all['Agency'].isin(a_list)]
+
+        fig2 = px.line(i, x='Fiscal Year', y='Obligations', color='Agency',title=f'Compare Total Spending - {agency_name} and {agency_name2}',  color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
+
+        fig2.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
+        max_i = (i['Obligations'].max()*1.1)
+        fig2.update_yaxes(title_text="Total Obligations ($)",range=[0,max_i]) # Name y axis
+        fig2.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
+        fig2.update_traces(line=dict(width=3)) # Increase line thickness
+        fig2.update_traces(mode="markers+lines", hovertemplate=None)
+        h['hoverdata'] = h['spending'].apply(human_format)
+        fig2.update_layout(hovermode="x")
+        #fig.update_traces(customdata = h['hoverdata'],hovertemplate = "%{customdata}")
+        fig2.update_traces(hovertemplate = "%{y}")
+
+        tab2.plotly_chart(fig2, use_container_width=True) # Show plot
+        tab2.caption('Source: USAspending')
+
 
     ############# Tab 3
 
@@ -195,3 +239,60 @@ if __name__ == "__main__":
                 decreasing steadily since FY2012. The proportion of funding awarded by larger subagencies and offices remains relatively consistent, indicating
                 that DoD been more higher-value contracts and fewer low-value contracts."""
     tab3.write(f'The top 10 {plural} are displayed and all others are grouped together. {sub_describe}')
+
+    ############# Tab 4
+
+    tab4.subheader('What kinds of service contracts is DoD awarding?')
+
+
+    tab4.write('')
+
+    tab4.write('There are a lot of ways we can categorize federal contracts. These are just a few:')
+
+    tab4a,tab4b,tab4c = tab4.tabs(['NAICS Code','Product or Service Code (PSC)','Contract Bundling'])
+
+    tab4a.markdown('<h4 align="left">What is a NAICS code?</h4>', unsafe_allow_html=True)
+    naicslink = 'https://www.census.gov/programs-surveys/economic-census/year/2022/guidance/understanding-naics.html#:~:text=The%20North%20American%20Industry%20Classification,to%20the%20U.S.%20business%20economy.'
+    tab4a.write(f'[The North American Industry Classification System (NAICS)]({naicslink}) is the standard used by Federal statistical agencies in classifying business establishments for the purpose of collecting, analyzing, and publishing statistical data related to the U.S. business economy. The NAICS code for each contract indicates what industry the contract\'s work falls into.')
+
+    tab4b.markdown('<h4 align="left">What is a PSC code?</h4>', unsafe_allow_html=True)
+    psclink = 'https://www.acquisition.gov/psc-manual.'
+    tab4b.write('A product or service code (PSC)is a four-digit code that describes a product, service, or research and development (R&D) activity purchased by the federal government.')
+
+    tab4b.write(f'The [Product and Service Codes Manual]({psclink}) is maintained by the General Services Administration (GSA) and lists all the existing PSCs, which indicate what the government bought for each contract action reported in the Federal Procurement Data System (FPDS).')
+
+    tab4c.markdown('<h4 align="left">What is contract bundling?</h4>', unsafe_allow_html=True)
+    tab4c.write("""Contract bundling refers to the practice of combining multiple contract requirements into a single procurement, typically for the purpose of achieving
+    cost savings or other efficiencies. In the federal government, contract bundling is governed by the Federal Acquisition Regulation (FAR), which includes specific rules
+    and guidelines for when and how contract bundling can be used.""")
+
+    tab4c.write("""Federal agencies are encouraged to use contract bundling, especially driven by category management efforts, as a way to achieve economies
+    of scale and reduce administrative costs.""")
+
+    tab4.subheader(' ')
+
+    tab4.markdown('<h6 align="left">View data on service contract funds that have been obligated (spent) to date</h6>', unsafe_allow_html=True) # Add a subheader
+
+    default = 2022
+    year = tab4.slider('Select a fiscal year to view data:',min_value = 2012, max_value = 2022, value = default)
+    default = year
+
+    categories = {'NAICS Code':'naics_description',
+    'Product or Service Code (PSC)':'product_or_service_code_description',
+                'Contract Bundling':'contract_bundling'}
+
+    category = tab4.radio("Categorize funds by:",categories.keys())
+    col_name = categories[category]
+
+    df_category = get_data(col_name)
+
+    b = df_category[df_category['fiscal_year']==year]
+
+    b['hoverdata'] = b['total_obligated_amount'].apply(human_format)
+
+    # Create pie chart
+    fig = go.Figure(data=[go.Pie(labels=b[col_name], values=b['total_obligated_amount'])]) # Create plot
+    fig.update_traces(textfont_size=16,marker=dict(colors=px.colors.qualitative.Prism),rotation=60) # Set colors and font size, and rotate plot 140 degress so that slice labels don't overlap with plot title
+    fig.update_layout(height=700,font=dict(size=16),showlegend=True,title=f'{agency_name} - Obligation Breakdown by {category}, FY{year}',title_x=0.5) # Set plot height, font size, title, and center title
+    fig.update_traces(customdata=b['hoverdata'],hovertemplate = "%{label} <br> %{percent} </br> %{customdata}<extra></extra>")
+    tab4.plotly_chart(fig, use_container_width=True) # Show plot
