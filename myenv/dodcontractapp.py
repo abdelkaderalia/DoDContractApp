@@ -44,6 +44,11 @@ def get_data(fname):
 @st.cache
 #define function to get geo data
 def get_geo(df):
+    """
+    This function combines the contract data with a shape file to create a map visualization.
+    Input: df of contract data, link to shapefile
+    Output: merged df
+    """
     geo = gpd.read_file('/vsicurl/https://github.com/abdelkaderalia/LIHEAPadminapp/raw/main/Data/tl_2021_us_state.shp')
     #save shapefile to dataframe
     geo = geo.to_crs("EPSG:4326")
@@ -69,12 +74,14 @@ if __name__ == "__main__":
     st.header('Opportunities for Category Management')
     st.write('')
 
+    # Create tabs for the different visualizations
     tab1, tab2, tab3, tab4, tab5 = st.tabs(['Understanding the Context', 'Comparing Other Agencies','Breaking Down Contracts Awarded','Categorizing Contract Types','Mapping Contracts and Spending'])
 
     ############## Tab 1
 
     tab1.write('')
 
+    # Store links to external information
     usasplink = 'https://www.usaspending.gov/search'
     gaolink = 'https://www.gao.gov/products/hr-93-8'
     gsalink = 'https://www.gsa.gov/buy-through-us/category-management#:~:text=Category%20Management%20is%20the%20practice,and%20effectiveness%20of%20acquisition%20activities'
@@ -106,9 +113,12 @@ if __name__ == "__main__":
 
     ############# Tab 2
 
+    # Import data to compare service contract spending across agencies
     df_agencies = get_data('compare_agencies')
+    # Create list of agencies to compare
     df_agencies = df_agencies.rename(columns={'agency':'Agency'})
 
+    # Import data to compare total spending across agencies
     df_all = get_data('compare_all_spending')
 
     agencies = df_agencies['Agency'].unique().tolist() # Convert agency names to list for dropdown menus
@@ -124,46 +134,47 @@ if __name__ == "__main__":
     agency_describe = """DoD far outranks all other federal agencies in its service contract spending, which has been extremely proportional to its total spending over time.
                     Not all other agencies see their contract spending trends mirrored in their total spending to the same degree."""
 
-    if agency_name2 == ' ': # If agency name 2 has been selected
+    if agency_name2 == ' ': # If agency name 2 has not been selected
 
+        # Filter service contract data to just DoD
         h = df_agencies[df_agencies['Agency']==agency_name]
-         # Create double line chart
+
+        # Create line chart
         fig1 = px.line(h, x='fiscal_year', y='spending', color='Agency',title=f'Compare Service Contract Spending - {agency_name}',  color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
 
-        fig1.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
+        fig1.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis, show all axis tixks
         fig1.update_yaxes(title_text="Contract Funds Obligated ($)",range=[0,180000000000]) # Name y axis
-        fig1.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
+        fig1.update_layout(height=600,font=dict(size=20),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
         fig1.update_traces(line=dict(width=3)) # Increase line thickness
         fig1.update_traces(mode="markers+lines", hovertemplate=None)
-        h['hoverdata'] = h['spending'].apply(human_format)
+        h['hoverdata'] = h['spending'].apply(human_format) # Set format of labels
         fig1.update_layout(hovermode="x")
-        #fig.update_traces(customdata = h['hoverdata'],hovertemplate = "%{customdata}")
         fig1.update_traces(hovertemplate = "%{y}")
 
         tab2.plotly_chart(fig1, use_container_width=True) # Show plot
         tab2.caption('Source: USAspending')
 
+        # Filter total spending data to just DoD
         i = df_all[df_all['Agency']==agency_name]
 
         fig2 = px.line(i, x='Fiscal Year', y='Obligations', color='Agency',title=f'Compare Total Spending - {agency_name}',  color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
 
-        fig2.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
+        fig2.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis, show all axis ticks
         max_i = (i['Obligations'].max()*1.1)
         fig2.update_yaxes(title_text="Total Obligations ($)",range=[0,max_i]) # Name y axis
         fig2.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
         fig2.update_traces(line=dict(width=3)) # Increase line thickness
         fig2.update_traces(mode="markers+lines", hovertemplate=None)
-        h['hoverdata'] = h['spending'].apply(human_format)
+        h['hoverdata'] = h['spending'].apply(human_format) # Set format of labels
         fig2.update_layout(hovermode="x")
-        #fig.update_traces(customdata = h['hoverdata'],hovertemplate = "%{customdata}")
-        fig2.update_traces(hovertemplate = "%{y}")
+        fig2.update_traces(hovertemplate = "%{y}")# Set format of labels
 
         tab2.plotly_chart(fig2, use_container_width=True) # Show plot
         tab2.caption('Source: USAspending')
 
-    else:
+    else: # If agency name has been selected
 
-        a_list = [agency_name,agency_name2]
+        a_list = [agency_name,agency_name2] # Filter data to DoD and agency 2
         h = df_agencies[df_agencies['Agency'].isin(a_list)]
 
          # Create double line chart
