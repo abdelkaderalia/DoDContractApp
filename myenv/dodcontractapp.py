@@ -363,15 +363,5 @@ if __name__ == "__main__":
 
     tab5.plotly_chart(fig,use_container_width=True)
 
-    # Create world layer for map.
-		map = folium.Map(control_scale = False, zoom_start = 1, width = 725, height = 500)
-
-		# Add subaward data to world map.
-		data_final_test.explore(
-			m = map, # Pass the map object.
-			column = "Cluster", # Which column to color.
-			tooltip = False, # ["subawardee_name", "subaward_amount_avg_str"], # Show custom tooltip.
-			legend = False,
-			name = "subawards", # Name of the layer on the map.
-			cmap = "Set1" # Color the clusters.
-		)
+    coord_map = get_data('data_coordinates')
+    tab5.map(coord_map)
