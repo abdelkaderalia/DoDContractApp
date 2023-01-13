@@ -145,7 +145,7 @@ if __name__ == "__main__":
         fig1.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis, show all axis tixks
         fig1.update_yaxes(title_text="Contract Funds Obligated ($)",range=[0,180000000000]) # Name y axis
         fig1.update_layout(height=600,font=dict(size=25),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
-        fig1.update_layout(yaxis = dict(tickfont = dict(size=20)))
+        fig1.update_layout(yaxis = dict(tickfont = dict(size=50)))
         fig1.update_traces(line=dict(width=3)) # Increase line thickness
         fig1.update_traces(mode="markers+lines", hovertemplate=None)
         h['hoverdata'] = h['spending'].apply(human_format) # Set format of labels
