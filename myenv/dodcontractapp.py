@@ -291,7 +291,7 @@ if __name__ == "__main__":
 
     tab4.subheader(' ')
 
-    tab4.markdown('<h6 align="left">View data on service contract funds that have been obligated (spent) to date</h6>', unsafe_allow_html=True) # Add a subheader
+    tab4.markdown('<h6 align="left">View data on all service contracts that were awarded by DoD, but have not necessarily been obligated</h6>', unsafe_allow_html=True) # Add a subheader
 
     # Create slider to select year and set default value
     default = 2022
@@ -341,7 +341,7 @@ if __name__ == "__main__":
 
     tab5.write('')
 
-    tab5.markdown('<h6 align="left">View data on service contract funds that have been obligated (spent) to date</h6>', unsafe_allow_html=True) # Add a subheader
+    tab5.markdown('<h6 align="left">View data on all service contracts that were awarded by DoD, but have not necessarily been obligated</h6>', unsafe_allow_html=True) # Add a subheader
 
     # Create slider to select year and set default value
     default_map = 2022
