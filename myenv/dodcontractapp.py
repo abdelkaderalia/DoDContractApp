@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
     agency_name = 'Department of Defense'
     tab2.subheader(f'How does the {agency_name} compare to other agencies?') # Add a subheader
-    tab2.markdown('<h6 align="left">View data on service contract funds that have been obligated (spent) to date</h6>', unsafe_allow_html=True) # Add a subheader
+    tab2.markdown('<h6 align="left">View data on service contract funds that were newly awarded in the fiscal year</h6>', unsafe_allow_html=True) # Add a subheader
     agency_name2 = tab2.selectbox("Compare with another one of the federal agencies that leads in service contracting:", agencies) # Store user selection for agency name 2
 
     agency_describe = """DoD far outranks all other federal agencies in its service contract spending, which has been extremely proportional to its total spending over time.
@@ -217,7 +217,7 @@ if __name__ == "__main__":
     ############# Tab 3
 
     tab3.subheader('How can we breakdown DoD\'s service contracts?')
-    tab3.markdown('<h6 align="left">View data on all service contracts that were awarded by DoD, but have not necessarily been obligated</h6>', unsafe_allow_html=True) # Add a subheader
+    tab3.markdown('<h6 align="left">View data on all service contracts with active transactions in the fiscal year</h6>', unsafe_allow_html=True) # Add a subheader
 
     tab3.write(' ')
 
@@ -291,7 +291,7 @@ if __name__ == "__main__":
 
     tab4.subheader(' ')
 
-    tab4.markdown('<h6 align="left">View data on all service contracts that were awarded by DoD, but have not necessarily been obligated</h6>', unsafe_allow_html=True) # Add a subheader
+    tab4.markdown('<h6 align="left">View data on all service contracts with active transactions in the fiscal year</h6>', unsafe_allow_html=True) # Add a subheader
 
     # Create slider to select year and set default value
     default = 2022
@@ -341,7 +341,7 @@ if __name__ == "__main__":
 
     tab5.write('')
 
-    tab5.markdown('<h6 align="left">View data on all service contracts that were awarded by DoD, but have not necessarily been obligated</h6>', unsafe_allow_html=True) # Add a subheader
+    tab5.markdown('<h6 align="left">View data on all service contracts with active transactions in the fiscal year</h6>', unsafe_allow_html=True) # Add a subheader
 
     # Create slider to select year and set default value
     default_map = 2022
