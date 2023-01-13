@@ -2,8 +2,6 @@ import streamlit as st
 st.set_page_config(page_icon="heavy_dollar_sign",page_title="DoD Service Contract Spending Explorer",layout="wide") # Increase page width for app
 import pandas as pd
 import numpy as np
-import asyncio
-import aiohttp
 import sys
 import requests
 import openpyxl
@@ -12,13 +10,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import time
-import webbrowser
-from PIL import Image
 import geopandas as gpd
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import mapclassify
-import folium
-
 
 #### Functions
 
@@ -311,6 +305,7 @@ if __name__ == "__main__":
     fig.update_layout(height=700,font=dict(size=16),showlegend=True,title=f'{agency_name} - Obligation Breakdown by {category}, FY{year}',title_x=0.5) # Set plot height, font size, title, and center title
     fig.update_traces(customdata=b['hoverdata'],hovertemplate = "%{label} <br> %{percent} </br> %{customdata}<extra></extra>")
     tab4.plotly_chart(fig, use_container_width=True) # Show plot
+    tab4.caption('Source: USAspending')
 
     category_describe = """The bulk of service contracts are awards for Engineering and Technical Services, which includes
     services like information technology management and telecommunications. For these services, DoD seems to prefer to hire contractors over FTEs."""
@@ -362,6 +357,26 @@ if __name__ == "__main__":
     #fig.update_traces(text = df.apply(lambda row: f"{row['NAME']}<br>{var}-{row[var_name]}", axis=1),hoverinfo="text", selector=dict(type='choropleth'))
 
     tab5.plotly_chart(fig,use_container_width=True)
+    tab5.caption('Source: USAspending')
+
+    tab5.write('The bulk of funding for service contracts is awarded in a handful of states like California, Texas, and Virginia, where there are a large number of military installations and facilities.')
+    tab5.write('Common, recurring, installation-level services, like those that fall into the PSC category Facility Related Services, are especially suited to the implementation of category management practices because the places of performance for these services are usually clustered near one another.')
+
+    tab5.markdown('<h4 align="center">Locations of Contracts for PSC Category 4.4: Facility Related Services, FY2022</h4>', unsafe_allow_html=True) # Add a subheader
 
     coord_map = get_data('data_coordinates')
-    tab5.map(coord_map)
+
+    group_codes = pd.DataFrame({'count' : coord_map.groupby(['product_or_service_code_description']).size()}).reset_index()
+    top_codes = group_codes.nlargest(10, 'count')
+    top_codes_list = top_codes['product_or_service_code_description'].tolist()
+    top_codes_list.insert(0, ' ')
+    psc_code = tab5.selectbox('Select a PSC to filter the map:',top_codes_list)
+
+    if psc_code == ' ':
+        tab5.map(coord_map,3)
+
+    elif psc_code != ' ':
+        filter_map = coord_map[coord_map['product_or_service_code_description']==psc_code]
+        tab5.map(filter_map,3)
+
+    tab5.caption('Source: USAspending')
