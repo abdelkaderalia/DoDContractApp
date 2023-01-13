@@ -144,8 +144,7 @@ if __name__ == "__main__":
 
         fig1.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis, show all axis tixks
         fig1.update_yaxes(title_text="Contract Funds Obligated ($)",range=[0,180000000000]) # Name y axis
-        fig1.update_layout(height=600,font=dict(size=25),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
-        fig1.update_layout(yaxis = dict(tickfont = dict(size=50)))
+        fig1.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
         fig1.update_traces(line=dict(width=3)) # Increase line thickness
         fig1.update_traces(mode="markers+lines", hovertemplate=None)
         h['hoverdata'] = h['spending'].apply(human_format) # Set format of labels
@@ -294,19 +293,24 @@ if __name__ == "__main__":
 
     tab4.markdown('<h6 align="left">View data on service contract funds that have been obligated (spent) to date</h6>', unsafe_allow_html=True) # Add a subheader
 
+    # Create slider to select year and set default value
     default = 2022
     year = tab4.slider('Select a fiscal year to view data:',min_value = 2012, max_value = 2022, value = default)
     default = year
 
+    # Create dictionary of category options
     categories = {'NAICS Code':'naics_description',
     'Product or Service Code (PSC)':'product_or_service_code_description',
                 'Contract Bundling':'contract_bundling'}
 
+    # Use radio buttons to select
     category = tab4.radio("Categorize funds by:",categories.keys())
     col_name = categories[category]
 
+    # Get category data based on user selection
     df_category = get_data(col_name)
 
+    # Filter data by year
     b = df_category[df_category['fiscal_year']==year]
 
     b['hoverdata'] = b['total_obligated_amount'].apply(human_format)
@@ -339,13 +343,16 @@ if __name__ == "__main__":
 
     tab5.markdown('<h6 align="left">View data on service contract funds that have been obligated (spent) to date</h6>', unsafe_allow_html=True) # Add a subheader
 
+    # Create slider to select year and set default value
     default_map = 2022
     map_year = tab5.slider('Select a fiscal year to map data:',min_value = 2012, max_value = 2022, value = default_map)
     default_map = map_year
 
+    # Get state level data
     df_state_data = get_data('primary_place_of_performance_state_code')
     df_state_data = df_state_data.rename(columns={'primary_place_of_performance_state_code':'State'})
 
+    # Merge with shape file to prepare for mapping
     df_state_map = get_geo(df_state_data)
     m = df_state_map[df_state_map['fiscal_year']==map_year]
 
@@ -356,6 +363,7 @@ if __name__ == "__main__":
         val = item[0]
         metrics_reversed[key] = val
 
+    # Create geopandas choropleth map
     fig = px.choropleth(m,locations='State', color='total_obligated_amount',
                        color_continuous_scale="Viridis",
                        hover_name='NAME',
@@ -365,8 +373,7 @@ if __name__ == "__main__":
                        labels=metrics_reversed,
                        height=800)
 
-    fig.update_layout(title_text=f'Value of Service Contracts Awarded by State, FY{year}', title_x=0.5,font=dict(size=16))
-    #fig.update_traces(text = df.apply(lambda row: f"{row['NAME']}<br>{var}-{row[var_name]}", axis=1),hoverinfo="text", selector=dict(type='choropleth'))
+    fig.update_layout(title_text=f'Value of Service Contracts Awarded by State, FY{year}', title_x=0.5,font=dict(size=16)) # Set title and font size
 
     tab5.plotly_chart(fig,use_container_width=True)
     tab5.caption('Source: USAspending')
@@ -376,17 +383,21 @@ if __name__ == "__main__":
 
     tab5.markdown('<h4 align="center">Locations of Contracts for PSC Category 4.4: Facility Related Services, FY2022</h4>', unsafe_allow_html=True) # Add a subheader
 
+    # Get coordinate data
     coord_map = get_data('data_coordinates')
 
+    # Group contracts by PSC and create list of top 10 to use in selectbox
     group_codes = pd.DataFrame({'count' : coord_map.groupby(['product_or_service_code_description']).size()}).reset_index()
     top_codes = group_codes.nlargest(10, 'count')
     top_codes_list = top_codes['product_or_service_code_description'].tolist()
     top_codes_list.insert(0, ' ')
     psc_code = tab5.selectbox('Select a PSC to filter the map:',top_codes_list)
 
+    # If PSC is not selected, show all contracts on map
     if psc_code == ' ':
         tab5.map(coord_map,3)
 
+    # If PSC is selected, filter data and then map
     elif psc_code != ' ':
         filter_map = coord_map[coord_map['product_or_service_code_description']==psc_code]
         tab5.map(filter_map,3)
