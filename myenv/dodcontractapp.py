@@ -392,6 +392,7 @@ if __name__ == "__main__":
     top_codes_list = top_codes['product_or_service_code_description'].tolist()
     top_codes_list.insert(0, ' ')
     psc_code = tab5.selectbox('Select a PSC to filter the map:',top_codes_list)
+    tab5.caption('(Click and drag the map to move to the United States)')
 
     # If PSC is not selected, show all contracts on map
     if psc_code == ' ':
