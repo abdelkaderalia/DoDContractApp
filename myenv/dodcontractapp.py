@@ -14,6 +14,10 @@ from plotly.subplots import make_subplots
 import time
 import webbrowser
 from PIL import Image
+import geopandas as gpd
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import mapclassify
+import folium
 
 
 #### Functions
@@ -42,6 +46,18 @@ def get_data(fname):
     url = f'https://github.com/abdelkaderalia/DoDContractApp/raw/main/Clean%20Data/Plot%20Data/{fname}.csv'
     df = pd.read_csv(url)
     return df
+
+@st.cache
+#define function to get geo data
+def get_geo(df):
+    geo = gpd.read_file('/vsicurl/https://github.com/abdelkaderalia/LIHEAPadminapp/raw/main/Data/tl_2021_us_state.shp')
+    #save shapefile to dataframe
+    geo = geo.to_crs("EPSG:4326")
+    geo = geo.rename(columns = {'STUSPS':'State'})
+
+    df_map = df.merge(geo,on='State',how='left')
+
+    return df_map
 
 
 #### Other setup
@@ -244,7 +260,6 @@ if __name__ == "__main__":
 
     tab4.subheader('What kinds of service contracts is DoD awarding?')
 
-
     tab4.write('')
 
     tab4.write('There are a lot of ways we can categorize federal contracts. These are just a few:')
@@ -296,3 +311,67 @@ if __name__ == "__main__":
     fig.update_layout(height=700,font=dict(size=16),showlegend=True,title=f'{agency_name} - Obligation Breakdown by {category}, FY{year}',title_x=0.5) # Set plot height, font size, title, and center title
     fig.update_traces(customdata=b['hoverdata'],hovertemplate = "%{label} <br> %{percent} </br> %{customdata}<extra></extra>")
     tab4.plotly_chart(fig, use_container_width=True) # Show plot
+
+    category_describe = """The bulk of service contracts are awards for Engineering and Technical Services, which includes
+    services like information technology management and telecommunications. For these services, DoD seems to prefer to hire contractors over FTEs."""
+
+    category_describe2 = 'Based on FAR, most DoD contracts do not require bundling. FAR places restrictions on bundling to promote competition and preserve award opportunities for small businesses.'
+
+    if category == 'NAICS Code' or category == 'Product or Service Code (PSC)':
+        tab4.write(f'The top 10 codes are displayed and all others are grouped together. {category_describe}')
+        tab4.write(category_describe2)
+    elif category == 'Contract Bundling':
+        tab4.write(category_describe)
+        tab4.write(category_describe2)
+
+    ############# Tab 5
+
+    tab5.subheader('How can we map DoD service contracts?')
+
+    tab5.write('')
+
+    tab5.markdown('<h6 align="left">View data on service contract funds that have been obligated (spent) to date</h6>', unsafe_allow_html=True) # Add a subheader
+
+    default_map = 2022
+    map_year = tab5.slider('Select a fiscal year to map data:',min_value = 2012, max_value = 2022, value = default_map)
+    default_map = map_year
+
+    df_state_data = get_data('primary_place_of_performance_state_code')
+    df_state_data = df_state_data.rename(columns={'primary_place_of_performance_state_code':'State'})
+
+    df_state_map = get_geo(df_state_data)
+    m = df_state_map[df_state_map['fiscal_year']==map_year]
+
+    metrics = {'Value of Contracts Awarded ($)':'total_obligated_amount'}
+    metrics_reversed = dict()
+    for item in metrics.items():
+        key = item[1]
+        val = item[0]
+        metrics_reversed[key] = val
+
+    fig = px.choropleth(m,locations='State', color='total_obligated_amount',
+                       color_continuous_scale="Viridis",
+                       hover_name='NAME',
+                       hover_data=['total_obligated_amount'],
+                       locationmode='USA-states',
+                       scope="usa",
+                       labels=metrics_reversed,
+                       height=800)
+
+    fig.update_layout(title_text=f'Value of Service Contracts Awarded by State, FY{year}', title_x=0.5,font=dict(size=16))
+    #fig.update_traces(text = df.apply(lambda row: f"{row['NAME']}<br>{var}-{row[var_name]}", axis=1),hoverinfo="text", selector=dict(type='choropleth'))
+
+    tab5.plotly_chart(fig,use_container_width=True)
+
+    # Create world layer for map.
+		map = folium.Map(control_scale = False, zoom_start = 1, width = 725, height = 500)
+
+		# Add subaward data to world map.
+		data_final_test.explore(
+			m = map, # Pass the map object.
+			column = "Cluster", # Which column to color.
+			tooltip = False, # ["subawardee_name", "subaward_amount_avg_str"], # Show custom tooltip.
+			legend = False,
+			name = "subawards", # Name of the layer on the map.
+			cmap = "Set1" # Color the clusters.
+		)
