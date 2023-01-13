@@ -75,7 +75,7 @@ if __name__ == "__main__":
     st.write('')
 
     # Create tabs for the different visualizations
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(['Understanding the Context', 'Comparing Other Agencies','Breaking Down Contracts Awarded','Categorizing Contract Types','Mapping Contracts and Spending'])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(['Understanding the Context', 'Comparing Other Agencies','Breaking Down Contracts Awarded','Categorizing Contract Types','Mapping Contracts Awarded'])
 
     ############## Tab 1
 
