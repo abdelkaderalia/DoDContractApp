@@ -32,13 +32,13 @@ def human_format(num):
                          ['', 'K', 'M', 'B', 'T'][magnitude])
 
 @st.cache(show_spinner=False)
-def CGAC_list():
+def compare_agencies():
     """
     This function imports the index of government agencies and corresponding Common Government Accounting Codes (CGAC) as a dataframe. Another script (Clean_CGAC.py) downloads the raw table of data and cleans it. The cleaned file is stored in the Github repository for this project, and this function loads the data from the raw Github link.
     Input: Github link (string)
     Output: Dataframe of agencies and CGAC codes (pd.Dataframe)
     """
-    url = 'https://github.com/abdelkaderalia/SpendApp/raw/main/Clean_Data/CGAC_list.xlsx'
+    url = 'https://github.com/abdelkaderalia/DoDContractApp/raw/main/Clean%20Data/compare_agencies.xlsx'
     r = requests.get(url)
     data = r.content
     df = pd.read_excel(data)
