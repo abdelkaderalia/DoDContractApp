@@ -169,9 +169,8 @@ if __name__ == "__main__":
         Y_label = 'Number of Contracts Awarded'
         Y_title = Y_label
 
-
     df_sub = get_data(sub_col)
-    df_sub = df_sub.rename(columns={sub_col:view})
+    df_sub = df_sub.rename(columns={sub_col_names[view]:view})
     df_sub = df_sub.sort_values(Y,ascending=False)
     col_title = view.split(' ')[1]
 
