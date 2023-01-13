@@ -43,6 +43,7 @@ def get_data(fname):
     df = pd.read_csv(url)
     return df
 
+
 #### Other setup
 
 # Create a list of colorblind-friendly colors for plotting
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     tab1.write('')
 
     tab1.subheader("""Exploring trends in contract spending can demonstrate the potential for category management""")
-    tab1.write('Visualizing contract data can illuminate not only the magnitude of DoD’s contractual service spending but also highlight areas where DoD could consider implementing category management.')
+    tab1.write('Visualizing contract data can illuminate not only the magnitude of DoD’s contractual service spending but also highlight the potential benefit of a wider implementation of category management.')
 
     tab1.write('')
 
@@ -106,7 +107,7 @@ if __name__ == "__main__":
     agency_name = 'Department of Defense'
     tab2.subheader(f'How does the {agency_name} compare to other agencies?') # Add a subheader
     tab2.markdown('<h6 align="left">View data on service contract funds that have been obligated (spent) to date</h6>', unsafe_allow_html=True) # Add a subheader
-    agency_name2 = tab2.selectbox("Choose another federal agency to compare:", agencies) # Store user selection for agency name 2
+    agency_name2 = tab2.selectbox("Compare with another of the federal agencies that leads in service contracting:", agencies) # Store user selection for agency name 2
 
     if agency_name2 == ' ': # If agency name 2 has been selected
 
@@ -115,7 +116,7 @@ if __name__ == "__main__":
         fig = px.line(h, x='fiscal_year', y='spending', color='Agency',title=f'Compare Contract Spending - {agency_name}',  color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
 
         fig.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
-        fig.update_yaxes(title_text="Contract Funds Obligated ($)") # Name y axis
+        fig.update_yaxes(title_text="Contract Funds Obligated ($)",range=[0,180000000000]) # Name y axis
         fig.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
         fig.update_traces(line=dict(width=3)) # Increase line thickness
         fig.update_traces(mode="markers+lines", hovertemplate=None)
@@ -125,6 +126,7 @@ if __name__ == "__main__":
         fig.update_traces(hovertemplate = "%{y}")
 
         tab2.plotly_chart(fig, use_container_width=True) # Show plot
+        tab2.caption('Source: USAspending')
 
     else:
 
@@ -135,7 +137,7 @@ if __name__ == "__main__":
         fig = px.line(h, x='fiscal_year', y='spending', color='Agency',title=f'Compare Contract Spending - {agency_name} and {agency_name2}',  color_discrete_sequence=CB_color_cycle) # Create plot, set title and colors
 
         fig.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
-        fig.update_yaxes(title_text="Contract Funds Obligated ($)") # Name y axis
+        fig.update_yaxes(title_text="Contract Funds Obligated ($)",range=[0,180000000000]) # Name y axis
         fig.update_layout(height=600,font=dict(size=16),legend=dict(yanchor="bottom",y=-0.4,xanchor="center",x=0.5,orientation="h"),title_x=0.5) # Set plot height, font size, move legent to bottom center, center title
         fig.update_traces(line=dict(width=3)) # Increase line thickness
         fig.update_traces(mode="markers+lines", hovertemplate=None)
@@ -145,6 +147,7 @@ if __name__ == "__main__":
         fig.update_traces(hovertemplate = "%{y}")
 
         tab2.plotly_chart(fig, use_container_width=True) # Show plot
+        tab2.caption('Source: USAspending')
 
     ############# Tab 3
 
@@ -156,25 +159,27 @@ if __name__ == "__main__":
     col1, col2, col3, col4, col5, col6 = tab3.columns(6)
     view = col1.radio('Choose your view:',('Awarding Subagency','Awarding Office','Contract Recipient'))
     mode = col2.radio('Choose your subtotal method:',('Dollar Value','Number of Contracts'))
-    sub_col_names = {'Awarding Subagency':'awarding_sub_agency_name','Awarding Office':'awarding_office_name','Contract Recipient':'recipient_name'}
+    sub_col_names = {'Awarding Subagency':['awarding_sub_agency_name','subagencies'],'Awarding Office':['awarding_office_name','offices'],'Contract Recipient':['recipient_name','recipients']}
+    sub_list = sub_col_names.get(view)
+    sub_col = sub_list[0]
 
     if mode == 'Dollar Value':
-        sub_col = sub_col_names[view]
+        sub_data = sub_col
         Y = 'total_obligated_amount'
         Y_label = 'Value of Contracts Awarded($)'
         Y_title = 'Value of Contracts Awarded'
     elif mode == 'Number of Contracts':
-        sub_col = f'{sub_col_names[view]}_count'
+        sub_data = f'{sub_col}_count'
         Y = 'count'
         Y_label = 'Number of Contracts Awarded'
         Y_title = Y_label
 
-    df_sub = get_data(sub_col)
-    df_sub = df_sub.rename(columns={sub_col_names[view]:view})
+    df_sub = get_data(sub_data)
+    df_sub = df_sub.rename(columns={sub_col:view})
     df_sub = df_sub.sort_values(Y,ascending=False)
     col_title = view.split(' ')[1]
 
-    fig = px.bar(df_sub, x='fiscal_year', y=Y, color=view,title=f'{agency_name} - Contracts Awarded by {col_title}',color_discrete_sequence=px.colors.qualitative.Prism) # Create plot and set title and colors
+    fig = px.bar(df_sub, x='fiscal_year', y=Y, color=view,title=f'{agency_name} - {Y_title} by {col_title}',color_discrete_sequence=px.colors.qualitative.Prism) # Create plot and set title and colors
 
     fig.update_xaxes(title_text="Fiscal Year",tickmode='linear') # Name x axis
     fig.update_yaxes(title_text=Y_label) # Name y axis
@@ -182,3 +187,11 @@ if __name__ == "__main__":
     fig.update_traces(hovertemplate = "%{y}")
 
     tab3.plotly_chart(fig, use_container_width=True) # Show plot
+    tab3.caption('Source: USAspending')
+    #tab3.markdown('<p style="text-align: right;">Source: USAspending</p>', unsafe_allow_html=True)
+
+    plural = sub_list[1]
+    sub_describe = """Though the dollar value of contracts awarded peaked in FY2019, the number of contracts awarded has been
+                decreasing steadily since FY2012. The proportion of funding awarded by larger subagencies and offices remains relatively consistent, indicating
+                that DoD been more higher-value contracts and fewer low-value contracts."""
+    tab3.write(f'The top 10 {plural} are displayed and all others are grouped together. {sub_describe}')
