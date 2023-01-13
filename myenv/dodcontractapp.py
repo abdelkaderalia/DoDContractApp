@@ -258,7 +258,7 @@ if __name__ == "__main__":
     plural = sub_list[1]
     sub_describe = """Though the dollar value of contracts awarded peaked in FY2019, the number of contracts awarded has been
                 decreasing steadily since FY2012. The proportion of funding awarded by larger subagencies and offices remains relatively consistent, indicating
-                that DoD been more higher-value contracts and fewer low-value contracts."""
+                that DoD has been awarding more higher-value contracts and fewer low-value contracts."""
     tab3.write(f'The top 10 {plural} are displayed and all others are grouped together. {sub_describe}')
 
     ############# Tab 4
